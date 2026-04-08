@@ -422,7 +422,7 @@ async function initAgoraCall() {
 async function startVideoCallWithAgora(channelName, userId) {
     try {
         const client = await initAgoraCall();
-        await client.join(AGORA_APP_ID, channelName, null, userId);
+        await client.join(AGORA_APP_ID_CALL, channelName, null, userId);
         localTracks.videoTrack = await AgoraRTC.createCameraVideoTrack();
         localTracks.audioTrack = await AgoraRTC.createMicrophoneAudioTrack();
         await client.publish([localTracks.videoTrack, localTracks.audioTrack]);
@@ -511,13 +511,13 @@ async function login() {
         } else {
             await db.ref(`users/${currentUser.uid}`).set({
                 uid: currentUser.uid, name: currentUser.displayName || email.split('@')[0],
-                email: email, bio: "مرحباً! أنا في NEXUS ✨", avatar: "", cover: "",
+                email: email, bio: "مرحباً! أنا في AYONI ✨", avatar: "", cover: "",
                 website: "", verified: false, isAdmin: false, blockedUsers: {}, mutedUntil: 0, createdAt: Date.now()
             });
         }
         if (email === ADMIN_EMAIL && password === ADMIN_PASSWORD) {
             showToast('🌟 مرحباً بك في لوحة التحكم يا مدير!');
-            await db.ref(`users/${currentUser.uid}`).update({ isAdmin: true, verified: true, name: 'Admin NEXUS' });
+            await db.ref(`users/${currentUser.uid}`).update({ isAdmin: true, verified: true, name: 'Admin AYONI' });
             currentUser.isAdmin = true;
             currentUser.verified = true;
         }
@@ -567,7 +567,7 @@ async function register() {
         await userCredential.user.updateProfile({ displayName: name });
         await db.ref(`users/${userCredential.user.uid}`).set({
             uid: userCredential.user.uid, name: name, email: email,
-            bio: "مرحباً! أنا في NEXUS ✨", avatar: "", cover: "", website: "",
+            bio: "مرحباً! أنا في AYONI ✨", avatar: "", cover: "", website: "",
             verified: false, isAdmin: email === ADMIN_EMAIL, blockedUsers: {}, mutedUntil: 0, createdAt: Date.now()
         });
         currentUser = userCredential.user;
@@ -1295,7 +1295,7 @@ async function openProfile(userId) {
     const profileAvatarLarge = document.getElementById('profileAvatarLarge');
     profileAvatarLarge.innerHTML = userData.avatar ? `<img src="${userData.avatar}" style="width:100%;height:100%;object-fit:cover">` : '<i class="fas fa-user text-5xl text-white flex items-center justify-center h-full"></i>';
     document.getElementById('profileName').innerHTML = `${escapeHtml(userData.name)} ${userData.verified ? '<i class="fas fa-check-circle verified-badge" style="color: #0095f6; font-size: 20px;"></i>' : ''}`;
-    document.getElementById('profileBio').textContent = userData.bio || "مرحباً! أنا في NEXUS ✨";
+    document.getElementById('profileBio').textContent = userData.bio || "مرحباً! أنا في AYONI ✨";
     const websiteEl = document.getElementById('profileWebsite');
     if (userData.website) websiteEl.innerHTML = `<a href="${userData.website}" target="_blank" style="color: #ff6b35;">${userData.website}</a>`;
     else websiteEl.innerHTML = '';
@@ -1810,7 +1810,7 @@ auth.onAuthStateChanged(async (user) => {
         } else {
             await db.ref(`users/${user.uid}`).set({
                 uid: user.uid, name: user.displayName || user.email.split('@')[0],
-                email: user.email, bio: "مرحباً! أنا في NEXUS ✨", avatar: "", cover: "",
+                email: user.email, bio: "مرحباً! أنا في AYONI ✨", avatar: "", cover: "",
                 website: "", verified: false, isAdmin: user.email === ADMIN_EMAIL,
                 blockedUsers: {}, mutedUntil: 0, createdAt: Date.now()
             });
