@@ -138,9 +138,16 @@ async function loadUserData() {
     }
 }
 
+// ✅ تم تعديل هذه الدالة - إضافة uid داخل الكائن
 async function loadAllUsers() {
     const snap = await db.ref('users').get();
     allUsers = snap.val() || {};
+    // ✅ إصلاح: إضافة الـ uid لكل مستخدم داخل الكائن نفسه
+    if (allUsers) {
+        Object.keys(allUsers).forEach(uid => {
+            allUsers[uid].uid = uid;
+        });
+    }
 }
 
 async function loadBadWords() {
@@ -338,6 +345,7 @@ async function toggleLike(postId) {
     }
 }
 
+// ✅ تم تعديل هذه الدالة - إصلاح مشكلة المتابعة
 // ========== المتابعة ==========
 async function toggleFollow(userId, btn) {
     if (!currentUser || currentUser.uid === userId) return;
@@ -350,16 +358,23 @@ async function toggleFollow(userId, btn) {
         await followingRef.remove();
         await followersRef.remove();
         if (btn) btn.innerText = 'متابعة';
+        if (currentUserData?.following) delete currentUserData.following[userId];
     } else {
         await followingRef.set(true);
         await followersRef.set(true);
         if (btn) btn.innerText = 'متابع';
+        if (!currentUserData.following) currentUserData.following = {};
+        currentUserData.following[userId] = true;
         await addNotification(userId, 'follow', currentUser.uid);
     }
     
+    // ✅ إصلاح: تحديث واجهة الملف الشخصي فوراً
     if (currentProfileUser === userId) {
         await loadProfileData(userId);
     }
+    
+    // ✅ إصلاح: تحديث قائمة المستخدمين العامة
+    await loadAllUsers();
 }
 
 // ========== التعليقات ==========
@@ -1301,11 +1316,25 @@ function containsBadWord(text) {
     return allBadWords.some(word => lowerText.includes(word.toLowerCase()));
 }
 
+// ✅ تم تعديل هذه الدالة - إصلاح مشكلة التوثيق
 async function verifyUser(userId) {
     await db.ref('users/' + userId + '/verified').set(true);
-    allUsers[userId].verified = true;
+    
+    // ✅ إصلاح: تحديث البيانات المحلية فوراً
+    if (allUsers[userId]) {
+        allUsers[userId].verified = true;
+    }
+    
+    // ✅ إصلاح: إذا كان الملف الشخصي للمستخدم الموثّق مفتوحاً، حدّثه
+    if (currentProfileUser === userId) {
+        await loadProfileData(userId);
+    }
+    
+    // ✅ إصلاح: تحديث المنشورات لإظهار علامة التوثيق
+    renderFeed();
+    
     showToast('✅ تم توثيق المستخدم');
-    openAdmin();
+    openAdmin(); // تحديث لوحة التحكم
 }
 
 async function toggleMuteUser(userId) {
